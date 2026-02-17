@@ -1,45 +1,47 @@
-#import the libraries thats are needed
-
-import os
 import shutil
+import os
 
-folders_to_clean = [
-    os.path.expanduser("~/Downloads"),
-    os.path.expanduser("~/Desktop"),
-]
-
-file_extension = {
-    'Images': ['.jpg', '.jpeg', '.png', '.gif'],
-    'Documents': ['.pdf', '.docx', '.txt', '.pptx',  ],
-    'Audio': ['.mp3', '.wav', '.aac', '.flac', '.alac', '.ogg'],
-    'Videos': ['.mp4', '.avi', '.mkv', '.mov', '.flv', '.wmv']
+files_clean = {
+   os.path.join(os.environ["USERPROFILE"], "OneDrive", "Desktop"),
+   os.path.join(os.environ["USERPROFILE"], "Downloads"),
 }
 
-def organize_folder(folder):
-    for n in os.listdir(folder):
-        ittem_path = os.path.join(folder, n)
+file_extentions = {
+    "Images": [ ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".svg" ],
+    "Videos": [ ".mp4", ".avi", ".mov", ".wmv", ".flv" ],
+    "Documents": [ ".pdf", ".docx", ".txt", ".ppsx", ".xlsx", ".csv" ],
+    "Audio": [ ".mp3", ".wav", ".flac" ],
+    "Archives": [ ".zip", ".rar", ".tar", ".gz" ],
+    "EXE": [".exe"]
+}
 
-        # Check if the item is a file or a folder
-        if os.path.isdir(ittem_path):
-            # If it's a folder, skip it
-            print(f"Skipping folder: {n}")
-        else:
-            # If its a file then we check the extention if it matches
-            # One of the extention in the file_extension dict and move 
-            # it to the folder where we want that file to move to
-            file_extension_name = os.path.splitext(n)[1].lower()
-            for folderName, extention in file_extension.items():
-                if file_extension_name in extention:
-                    destination = os.path.join(folder, folderName)
-                    break
-            else:
-                destination = os.path.join(folder, "Other")
-                    
-            if not os.path.exists(destination):
-                os.makedirs(destination)
-                shutil.move(ittem_path, destination)
-                print(f"moved {n} to {destination}")
-# Loop through the folders we want to clean and organize them
-for folder in folders_to_clean:
-    organize_folder(folder)    
-print("Organizing completed!")
+def file_organizer(folder):
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+
+        if os.path.isdir(file_path):
+            print(f"Skipping file: {filename}")
+            continue
+
+        file_extention_name = os.path.splitext(filename)[1].lower()
+        moved = False
+
+        for catogery, extention in file_extentions.items():
+            if file_extention_name in extention:
+                destination = os.path.join(folder, catogery)
+
+                if not os.path.exists(destination):        
+                    os.makedirs(destination)
+
+                shutil.move(file_path, os.path.join(destination, filename))
+                print(f"Moved {filename} to {destination}")
+                moved = True
+                break
+        
+        if not moved:
+            print(f"No extention found for {filename}")
+        
+for n in files_clean:
+    file_organizer(n)
+    
+print("File Organization was successfully completed!")
